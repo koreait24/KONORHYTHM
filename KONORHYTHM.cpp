@@ -127,7 +127,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     LONG Style;
     Sound* sound = new Sound(hWnd, _T("opening.mp3"));
-    Bitmap* bitmap = new Bitmap(hInst, IDB_MAIN);
+    Bitmap* bitmapMain = new Bitmap(hInst, IDB_MAIN);
+    Bitmap* bitmapStart = new Bitmap(hInst, IDB_START);
 
     switch (message)
     {
@@ -170,14 +171,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-            bitmap->DRAWBITMAP(hdc, 0, 0);
-            EndPaint(hWnd, &ps);
+            bitmapMain->DRAWBITMAP(hdc, 0, 0);
+            bitmapStart->DRAWBITMAP(hdc, 187, 500, TRUE);
+            std::thread blink{ &Bitmap::EffectBlink, bitmapStart, TRUE };
+            blink.detach();
+            // EndPaint(hWnd, &ps);
         }
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
         sound->end();
-        bitmap->end();
+        bitmapMain->end();
+        bitmapStart->end();
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);

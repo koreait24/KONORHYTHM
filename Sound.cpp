@@ -36,5 +36,6 @@ void Sound::end()
     if (wDeviceID > 0)
     {
         BGM = mciSendCommand(1, MCI_CLOSE, 0, (DWORD)(LPVOID)NULL);
+        delete this;
     }
 }

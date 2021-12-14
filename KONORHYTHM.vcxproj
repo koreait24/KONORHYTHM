@@ -159,6 +159,7 @@
     <Image Include="MAIN.bmp" />
     <Image Include="select song.bmp" />
     <Image Include="small.ico" />
+    <Image Include="START.bmp" />
     <Image Include="VGA.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

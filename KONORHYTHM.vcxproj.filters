@@ -78,5 +78,8 @@
     <Image Include="VGA.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="START.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
 </Project>

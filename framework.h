@@ -10,6 +10,9 @@
 #include <windows.h>
 #include <mmsystem.h>
 #include <Digitalv.h>
+// STL 헤더 파일입니다.
+#include <thread>
+#include <mutex>
 // C 런타임 헤더 파일입니다.
 #include <stdlib.h>
 #include <malloc.h>
@@ -17,3 +20,4 @@
 #include <tchar.h>
 // 라이브러리 로드
 #pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "Msimg32.lib")
