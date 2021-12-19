@@ -1,9 +1,10 @@
-#include "Sound.h"
+﻿#include "Sound.h"
 
 #pragma once
-Sound::Sound(HWND hWnd, LPCTSTR lpszWave)
+Sound::Sound(HWND hWnd, LPCTSTR lpszWave, BGMID bgm)
 {
-        LoadWAV(hWnd, lpszWave);
+    this->bgm = bgm;
+    LoadWAV(hWnd, lpszWave);
 }
 
 DWORD Sound::LoadWAV(HWND hWnd, LPCTSTR lpszWave)
@@ -17,25 +18,27 @@ DWORD Sound::LoadWAV(HWND hWnd, LPCTSTR lpszWave)
         return Result;
 
     wDeviceID = mciOpen.wDeviceID;
-
     mciPlay.dwCallback = (DWORD)hWnd;
 
     if (Result)
         return Result;
+}
 
-    return 0;
+void Sound::stop()
+{
+    BGM = mciSendCommand((MCIDEVICEID)bgm, MCI_CLOSE, 0, (DWORD)(LPVOID)NULL);
 }
 
 void Sound::play() 
 {
-    BGM = mciSendCommand(1, MCI_PLAY, MCI_NOTIFY, (DWORD)(LPVOID)&mciPlay);
+    BGM = mciSendCommand((MCIDEVICEID)bgm, MCI_PLAY, MCI_NOTIFY, (DWORD)(LPVOID)&mciPlay);
 }
 
 void Sound::end()
 {
     if (wDeviceID > 0)
     {
-        BGM = mciSendCommand(1, MCI_CLOSE, 0, (DWORD)(LPVOID)NULL);
+        BGM = mciSendCommand((MCIDEVICEID)bgm, MCI_CLOSE, 0, (DWORD)(LPVOID)NULL);
         delete this;
     }
 }

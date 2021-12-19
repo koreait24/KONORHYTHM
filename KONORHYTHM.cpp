@@ -1,7 +1,6 @@
 ﻿// KONORHYTHM.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 #pragma once
-#include "framework.h"
 #include "KONORHYTHM.h"
 #include "Sound.h"
 #include "Bitmap.h"
@@ -18,6 +17,11 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+// 메인 게임 클래스
+KONORHYTHM* GAME = new KONORHYTHM;
+Bitmap* bitmapMain;
+Bitmap* bitmapStart;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -43,6 +47,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_KONORHYTHM));
 
     MSG msg;
+
+    std::thread TGAME = std::thread{ &KONORHYTHM::start, GAME };
+    TGAME.join();
 
     // 기본 메시지 루프입니다:
     while (GetMessage(&msg, nullptr, 0, 0))
@@ -126,10 +133,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     LONG Style;
-    Sound* sound = new Sound(hWnd, _T("opening.mp3"));
-    Bitmap* bitmapMain = new Bitmap(hInst, IDB_MAIN);
-    Bitmap* bitmapStart = new Bitmap(hInst, IDB_START);
-
+    Sound* soundmain = new Sound(hWnd, _T("sound\\opening.mp3"), BGMID::GAMEHOME);
+    Sound* soundstart = new Sound(hWnd, _T("sound\\start.mp3"), BGMID::GAMEMAIN);
+    Sound* soundselect = new Sound(hWnd, _T("sound\\select.mp3"), BGMID::GAMESELECT);
     switch (message)
     {
     /*case WM_COMMAND:
@@ -155,7 +161,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         Style &= ~WS_MAXIMIZEBOX;
         SetWindowLong(hWnd, GWL_STYLE, Style);
         MoveWindow(hWnd, 100, 100, 1214, 681, TRUE);
-        sound->play();
+        soundmain->play();
     }break;
 
     case WM_GETMINMAXINFO:
@@ -171,23 +177,54 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-            bitmapMain->DRAWBITMAP(hdc, 0, 0);
-            bitmapStart->DRAWBITMAP(hdc, 187, 500, TRUE);
-            std::thread blink{ &Bitmap::EffectBlink, bitmapStart, TRUE };
-            blink.detach();
-            // EndPaint(hWnd, &ps);
+            if (GAME->Getgstat() == GAMESTATUS::GAMEHOME) {
+                if (!bitmapMain) {
+                    bitmapMain = new Bitmap(hInst, { {IDB_MAIN, FALSE}, {IDB_START, TRUE} });
+                }
+                bitmapMain->INITBITMAP(hdc, 187, 500);
+                std::thread blink{ &Bitmap::EffectBlink, bitmapMain, hWnd };
+                blink.join();
+            }
+
+            if (GAME->Getgstat() == GAMESTATUS::GAMEMAIN) {
+                if (!bitmapStart) {
+                    soundstart->play();
+                    bitmapMain->EffectFadeout(hWnd);
+                    bitmapStart = new Bitmap(hInst, { {IDB_SELECT, FALSE} , {IDB_CD01NOR, TRUE} });
+                    bitmapStart->INITBITMAP(hdc, 700, 90);
+                    bitmapStart->EffectFadein(hWnd);
+                    soundstart->stop();
+                    soundselect->play();
+                }
+            }
+            EndPaint(hWnd, &ps);
+        }
+        break;
+
+    case WM_KEYDOWN:
+        switch (wParam)
+        {
+        case VK_ESCAPE:
+            PostQuitMessage(0);
+            break;
+        case VK_RETURN:
+            if (GAME->Getgstat() == GAMESTATUS::GAMEHOME) {
+                soundmain->stop();
+                return GAME->MainProc(hWnd, message, wParam, lParam);
+            }
         }
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
-        sound->end();
-        bitmapMain->end();
-        bitmapStart->end();
+        soundmain->end();
+        if(bitmapMain)
+            bitmapMain->end();
+        if (bitmapStart)
+            bitmapStart->end();
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
-    return 0;
 }
 
 // 정보 대화 상자의 메시지 처리기입니다.

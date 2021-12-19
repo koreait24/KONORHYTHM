@@ -45,6 +45,12 @@
     <ClInclude Include="targetver.h">
       <Filter>헤더 파일\Main</Filter>
     </ClInclude>
+    <ClInclude Include="Process.h">
+      <Filter>헤더 파일\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Commondefine.h">
+      <Filter>헤더 파일\Main</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bitmap.cpp">
@@ -54,6 +60,12 @@
       <Filter>소스 파일\Engine</Filter>
     </ClCompile>
     <ClCompile Include="KONORHYTHM.cpp">
+      <Filter>소스 파일\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Process.cpp">
+      <Filter>소스 파일\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="KONOMAIN.cpp">
       <Filter>소스 파일\Main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -79,6 +91,12 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="START.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="disk01.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="disk01normal.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

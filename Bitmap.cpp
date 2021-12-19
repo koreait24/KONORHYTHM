@@ -1,74 +1,150 @@
-#include "Bitmap.h"
+ï»¿#include "Bitmap.h"
+#include "resource.h"
 
-Bitmap::Bitmap(HINSTANCE& hInst, int res)
+Bitmap::Bitmap(HINSTANCE& hInst, std::unordered_map<int, bool> res)
 {
-    MyBitmap = LoadBitmap(hInst, MAKEINTRESOURCE(res));
+    for (const auto &it : res)
+    {
+        MyBitmap.push_back(LoadBitmap(hInst, MAKEINTRESOURCE(it.first)));
+    }
+    this->res.insert(res.begin(), res.end());
+}
+
+void Bitmap::INITBITMAP(HDC& hdc, int x, int y, bool isTran) 
+{
+    this->hdc = hdc;
+
+    int index = 0;
+    for (const auto& it : res) {
+        MemDC.push_back(CreateCompatibleDC(hdc));
+        SelectObject(MemDC[index], MyBitmap[index]);
+
+        bit.push_back(iBit);
+        GetObject(MyBitmap[index], sizeof(BITMAP), &bit[index]);
+        bx = bit[index].bmWidth;
+        by = bit[index].bmHeight;
+        this->x = x;
+        this->y = y;
+        index++;
+    }
 }
 
 void Bitmap::DRAWBITMAP(HDC &hdc, int x, int y, bool isTran)
 {
-    MemDC           = CreateCompatibleDC(hdc);
-    CopyDC          = CreateCompatibleDC(hdc);
-    ObjDC           = CreateCompatibleDC(hdc);
-    MemOldBitmap    = (HBITMAP)SelectObject(MemDC, MyBitmap);
-    CopyOldBitmap   = (HBITMAP)SelectObject(CopyDC, MyBitmap);
-    ObjOldBitmap    = (HBITMAP)SelectObject(ObjDC, MyBitmap);
-    GetObject(MyBitmap, sizeof(BITMAP), &bit);
+    this->hdc = hdc;
 
-    bx          = bit.bmWidth;
-    by          = bit.bmHeight;
-    this->x     = x;
-    this->y     = y;
-    this->hdc   = hdc;
+    int index = 0;
+    for (const auto &it : res) 
+    {
+        if (index == 0) {
+            if (it.second) {
+                TransparentBlt(hdc, 0, 0, bx, by, MemDC[index], 0, 0, bx, by, RGB(255, 242, 204));
+            }
+            else
+                BitBlt(hdc, 0, 0, bx, by, MemDC[index], 0, 0, SRCCOPY);
+        }
 
-    if (isTran) {
-        TransparentBlt(hdc, x, y, bx, by, MemDC, 0, 0, bx, by, RGB(255, 242, 204));
+        else {
+            if (it.second) {
+                TransparentBlt(hdc, x, y, bx, by, MemDC[index], 0, 0, bx, by, RGB(255, 242, 204));
+            }
+            else
+                BitBlt(hdc, x, y, bx, by, MemDC[index], 0, 0, SRCCOPY);
+        }
+        index++;
     }
-    else
-        BitBlt(hdc, x, y, bx, by, MemDC, 0, 0, SRCCOPY);
 }
 
-void Bitmap::EffectBlink(bool isTran)
+void Bitmap::EffectBlink(HWND hWnd)
 {
+    // std::lock_guard<std::mutex> EffectLock (EffectMutex);
     BLENDFUNCTION bf;
 
-    isContinue = true;
-    bf.AlphaFormat = 0; // ºñÆ®¸Ê Á¾·ù·Î ÀÏ¹İ ºñÆ®¸ÊÀÇ °æ¿ì 0, 32ºñÆ® ºñÆ®¸ÊÀÇ °æ¿ì AC_SRC_ALPHA
-    bf.BlendFlags = 0; // ¹«Á¶°Ç 0ÀÌ¾î¾ß ÇÑ´Ù
-    bf.BlendOp = AC_SRC_OVER; // ¹«Á¶°Ç AC_SRC_OVERÀÌ¾î¾ß ÇÏ°í ¿øº»°ú ´ë»ó ÀÌ¹ÌÁö¸¦ ÇÕÄ£´Ù´Â ÀÇ¹Ì
-    if (isTran) {
-        TransparentBlt(CopyDC, x, y, bx, by, MemDC, 0, 0, bx, by, RGB(255, 242, 204));
-    }
-    else
-        BitBlt(CopyDC, x, y, bx, by, MemDC, 0, 0, SRCCOPY);
+    bf.AlphaFormat = 0; // ë¹„íŠ¸ë§µ ì¢…ë¥˜ë¡œ ì¼ë°˜ ë¹„íŠ¸ë§µì˜ ê²½ìš° 0, 32ë¹„íŠ¸ ë¹„íŠ¸ë§µì˜ ê²½ìš° AC_SRC_ALPHA
+    bf.BlendFlags = 0; // ë¬´ì¡°ê±´ 0ì´ì–´ì•¼ í•œë‹¤
+    bf.BlendOp = AC_SRC_OVER; // ë¬´ì¡°ê±´ AC_SRC_OVERì´ì–´ì•¼ í•˜ê³  ì›ë³¸ê³¼ ëŒ€ìƒ ì´ë¯¸ì§€ë¥¼ í•©ì¹œë‹¤ëŠ” ì˜ë¯¸
 
-    while (isContinue) {
-        for (int i = 255; i >= 50; i -= 30) {
-            bx = bit.bmWidth;
-            by = bit.bmHeight;
-            bf.SourceConstantAlpha = i; // Åõ¸íµµ(Åõ¸í 0 - ºÒÅõ¸í 255)
-            AlphaBlend(hdc, i, y, bx, by, CopyDC, 0, 0, bx, by, bf);
-            Sleep(1000);
+    CopyDC = CreateCompatibleDC(hdc);
+    hCopy = CreateCompatibleBitmap(hdc, bx, by);
+    SelectObject(CopyDC, hCopy);
+
+    RECT EFFECTRECT;
+
+    for (unsigned int i = 255; i >= 50; i -= 10) {
+        for (unsigned int j = 0; j < MyBitmap.size(); j++) {
+            bx = bit[j].bmWidth;
+            by = bit[j].bmHeight;
+            EFFECTRECT = { x, y, bx, by };
+            bf.SourceConstantAlpha = i; // íˆ¬ëª…ë„(íˆ¬ëª… 0 - ë¶ˆíˆ¬ëª… 255)
+            BitBlt(CopyDC, 0, 0, bx, by, MemDC[0], x, y, SRCCOPY);
+            TransparentBlt(CopyDC, 0, 0, bx, by, MemDC[j], 0, 0, bx, by, RGB(255, 242, 204));
+            BitBlt(hdc, 0, 0, bit[0].bmWidth, bit[0].bmHeight, MemDC[0], 0, 0, SRCCOPY);
+            AlphaBlend(hdc, x, y, bx, by, CopyDC, 0, 0, bx, by, bf);
+            InvalidateRect(hWnd, &EFFECTRECT, FALSE);
         }
-        for (int i = 50; i <= 230; i += 30) {
-            bx = bit.bmWidth;
-            by = bit.bmHeight;
-            bf.SourceConstantAlpha = i;
-            AlphaBlend(hdc, i, y, bx, by, CopyDC, 0, 0, bx, by, bf);
-            Sleep(1000);
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
-    DeleteObject(MyBitmap);
+}
+
+void Bitmap::EffectFadeout(HWND hWnd)
+{
+    // std::lock_guard<std::mutex> EffectLock (EffectMutex);
+    BLENDFUNCTION bf;
+
+    bf.AlphaFormat = 0; // ë¹„íŠ¸ë§µ ì¢…ë¥˜ë¡œ ì¼ë°˜ ë¹„íŠ¸ë§µì˜ ê²½ìš° 0, 32ë¹„íŠ¸ ë¹„íŠ¸ë§µì˜ ê²½ìš° AC_SRC_ALPHA
+    bf.BlendFlags = 0; // ë¬´ì¡°ê±´ 0ì´ì–´ì•¼ í•œë‹¤
+    bf.BlendOp = AC_SRC_OVER; // ë¬´ì¡°ê±´ AC_SRC_OVERì´ì–´ì•¼ í•˜ê³  ì›ë³¸ê³¼ ëŒ€ìƒ ì´ë¯¸ì§€ë¥¼ í•©ì¹œë‹¤ëŠ” ì˜ë¯¸
+
+    BaseDC = CreateCompatibleDC(hdc);
+    hBase = CreateCompatibleBitmap(hdc, bit[0].bmWidth, bit[0].bmHeight);
+    SelectObject(BaseDC, hBase);
+
+    RECT EFFECTRECT = { 0, 0, bit[0].bmWidth, bit[0].bmHeight };
+
+    for (unsigned int i = 255; i >= 50; i -= 10) {
+        BitBlt(BaseDC, 0, 0, bit[0].bmWidth, bit[0].bmHeight, MemDC[0], 0, 0, SRCCOPY);
+        for (unsigned int j = 1; j < MyBitmap.size(); j++) {
+            bx = bit[j].bmWidth;
+            by = bit[j].bmHeight;
+            TransparentBlt(BaseDC, x, y, bx, by, MemDC[j], 0, 0, bx, by, RGB(255, 242, 204));
+        }
+        bf.SourceConstantAlpha = i;
+        AlphaBlend(hdc, 0, 0, bit[0].bmWidth, bit[0].bmHeight, BaseDC, 0, 0, bit[0].bmWidth, bit[0].bmHeight, bf);
+        InvalidateRect(hWnd, &EFFECTRECT, FALSE);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+}
+
+void Bitmap::EffectFadein(HWND hWnd)
+{
+    // std::lock_guard<std::mutex> EffectLock (EffectMutex);
+    BLENDFUNCTION bf;
+
+    bf.AlphaFormat = 0; // ë¹„íŠ¸ë§µ ì¢…ë¥˜ë¡œ ì¼ë°˜ ë¹„íŠ¸ë§µì˜ ê²½ìš° 0, 32ë¹„íŠ¸ ë¹„íŠ¸ë§µì˜ ê²½ìš° AC_SRC_ALPHA
+    bf.BlendFlags = 0; // ë¬´ì¡°ê±´ 0ì´ì–´ì•¼ í•œë‹¤
+    bf.BlendOp = AC_SRC_OVER; // ë¬´ì¡°ê±´ AC_SRC_OVERì´ì–´ì•¼ í•˜ê³  ì›ë³¸ê³¼ ëŒ€ìƒ ì´ë¯¸ì§€ë¥¼ í•©ì¹œë‹¤ëŠ” ì˜ë¯¸
+
+    BaseDC = CreateCompatibleDC(hdc);
+    hBase = CreateCompatibleBitmap(hdc, bit[0].bmWidth, bit[0].bmHeight);
+    SelectObject(BaseDC, hBase);
+
+    RECT EFFECTRECT = { 0, 0, bit[0].bmWidth, bit[0].bmHeight };
+
+    for (unsigned int i = 55; i < 255; i += 10) {
+        BitBlt(BaseDC, 0, 0, bit[0].bmWidth, bit[0].bmHeight, MemDC[0], 0, 0, SRCCOPY);
+            for (unsigned int j = 1; j < MyBitmap.size(); j++) {
+                bx = bit[j].bmWidth;
+                by = bit[j].bmHeight;
+                TransparentBlt(BaseDC, x, y, bx, by, MemDC[j], 0, 0, bx, by, RGB(255, 242, 204));
+            }
+            bf.SourceConstantAlpha = i;
+            AlphaBlend(hdc, 0, 0, bit[0].bmWidth, bit[0].bmHeight, BaseDC, 0, 0, bit[0].bmWidth, bit[0].bmHeight, bf);
+            InvalidateRect(hWnd, &EFFECTRECT, FALSE);
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
 }
 
 void Bitmap::end()
 {
-    SelectObject(MemDC, MemOldBitmap);
-    DeleteDC(MemDC);
-    SelectObject(CopyDC, CopyOldBitmap);
-    DeleteDC(CopyDC);
-    SelectObject(ObjDC, ObjOldBitmap);
-    DeleteDC(ObjDC);
-    isContinue = FALSE;
     delete this;
 }

@@ -1,24 +1,26 @@
-#pragma once
+ï»¿#pragma once
 
 #include "framework.h"
 
 class Sound
 {
 public:
-	Sound(HWND hWnd, LPCTSTR lpszWave);
+	Sound(HWND hWnd, LPCTSTR lpszWave, BGMID bgm);
+	void stop();
 	void play();
 	void end();
 
 private:
 	DWORD LoadWAV(HWND hWnd, LPCTSTR lpszWave);
 
-public:
-	MCI_OPEN_PARMS       mciOpen; //ÆÄÀÏÀ» ·Îµå
-	MCI_PLAY_PARMS       mciPlay; //ÆÄÀÏÀ» Àç»ı
-	MCI_STATUS_PARMS     mciStatus; //ÆÄÀÏÀÇ »óÅÂ
+private:
+	MCI_OPEN_PARMS       mciOpen; //íŒŒì¼ì„ ë¡œë“œ
+	MCI_PLAY_PARMS       mciPlay; //íŒŒì¼ì„ ì¬ìƒ
+	MCI_STATUS_PARMS     mciStatus; //íŒŒì¼ì˜ ìƒíƒœ
 
-	UINT wDeviceID = 0;
-
+	int wDeviceID = 0;
+	
+	BGMID bgm;
 	DWORD BGM = 0;
 	DWORD Result;
 };

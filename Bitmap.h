@@ -1,20 +1,32 @@
-#pragma once
+ï»¿#pragma once
 #include "framework.h"
 class Bitmap
 {
 public:
-	Bitmap(HINSTANCE& hInst, int res);
+	Bitmap(HINSTANCE& hInst, std::unordered_map<int, bool> res);
 	void DRAWBITMAP(HDC& hdc, int x, int y, bool isTran = false);
+	void INITBITMAP(HDC& hdc, int x, int y, bool isTran = false);
 	void end();
-	void EffectBlink(bool isTran = TRUE);
+
+public:										// ë¹„íŠ¸ë§µ ì• ë‹ˆë©”ì´ì…˜ ì„¹ì…˜
+	bool GetEffectBlink();
+	void EffectBlink(HWND hWnd);
+	void EffectFadein(HWND hWnd);
+	void EffectFadeout(HWND hWnd);
 
 public:
-	HDC hdc, CopyDC, MemDC, ObjDC; // Ahdc´Â Transeparents ÀúÀå ¿ë
-	PAINTSTRUCT ps;
-	HBITMAP MyBitmap, CopyOldBitmap, MemOldBitmap, ObjOldBitmap;
-	int x, y;			// ÀÌ¹ÌÁö ±×¸± ÁÂÇ¥
-	bool isContinue;
-	int bx, by;
-	BITMAP bit;
-};
+	HDC						hdc, CopyDC, BaseDC; // AhdcëŠ” Transeparents ì €ì¥ ìš©
+	PAINTSTRUCT				ps;
+	BITMAP					iBit;
+	HBITMAP					hCopy, hBase;
+	std::vector<HBITMAP>	MyBitmap;
+	std::vector<BITMAP>		bit;
+	std::vector<HDC>		MemDC;
+	int						x, y;			// ì´ë¯¸ì§€ ê·¸ë¦´ ì¢Œí‘œ
+	int						bx, by;
 
+	std::unordered_map<int, bool> res;
+	std::thread					  Blink;
+	std::mutex					  EffectMutex;
+private:
+};

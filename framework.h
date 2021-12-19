@@ -13,6 +13,11 @@
 // STL 헤더 파일입니다.
 #include <thread>
 #include <mutex>
+#include <vector>
+#include <map>
+#include <unordered_map>
+// 커스텀 헤더 파일입니다.
+#include "Commondefine.h"
 // C 런타임 헤더 파일입니다.
 #include <stdlib.h>
 #include <malloc.h>
