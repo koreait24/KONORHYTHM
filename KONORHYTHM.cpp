@@ -2,13 +2,10 @@
 //
 #pragma once
 #include "KONORHYTHM.h"
-#include "Sound.h"
-#include "Bitmap.h"
 
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
-HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 
@@ -22,6 +19,11 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 KONORHYTHM* GAME = new KONORHYTHM;
 Bitmap* bitmapMain;
 Bitmap* bitmapStart;
+Bitmap* bitmapFast;
+Bitmap* bitmapNote;
+Bitmap* bitmap1mmNor;
+Bitmap* bitmapinopt;
+BITMAPCOLLECTION collection;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -104,7 +106,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+   GAME->hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
@@ -133,9 +135,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     LONG Style;
-    Sound* soundmain = new Sound(hWnd, _T("sound\\opening.mp3"), BGMID::GAMEHOME);
-    Sound* soundstart = new Sound(hWnd, _T("sound\\start.mp3"), BGMID::GAMEMAIN);
-    Sound* soundselect = new Sound(hWnd, _T("sound\\select.mp3"), BGMID::GAMESELECT);
     switch (message)
     {
     /*case WM_COMMAND:
@@ -161,7 +160,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         Style &= ~WS_MAXIMIZEBOX;
         SetWindowLong(hWnd, GWL_STYLE, Style);
         MoveWindow(hWnd, 100, 100, 1214, 681, TRUE);
-        soundmain->play();
+        GAME->soundmain->play();
     }break;
 
     case WM_GETMINMAXINFO:
@@ -172,35 +171,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         ((MINMAXINFO*)lParam)->ptMinTrackSize.y = 681;
     }
 
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-            if (GAME->Getgstat() == GAMESTATUS::GAMEHOME) {
-                if (!bitmapMain) {
-                    bitmapMain = new Bitmap(hInst, { {IDB_MAIN, FALSE}, {IDB_START, TRUE} });
-                }
-                bitmapMain->INITBITMAP(hdc, 187, 500);
-                std::thread blink{ &Bitmap::EffectBlink, bitmapMain, hWnd };
-                blink.join();
-            }
-
-            if (GAME->Getgstat() == GAMESTATUS::GAMEMAIN) {
-                if (!bitmapStart) {
-                    soundstart->play();
-                    bitmapMain->EffectFadeout(hWnd);
-                    bitmapStart = new Bitmap(hInst, { {IDB_SELECT, FALSE} , {IDB_CD01NOR, TRUE} });
-                    bitmapStart->INITBITMAP(hdc, 700, 90);
-                    bitmapStart->EffectFadein(hWnd);
-                    soundstart->stop();
-                    soundselect->play();
-                }
-            }
-            EndPaint(hWnd, &ps);
-        }
-        break;
-
     case WM_KEYDOWN:
         switch (wParam)
         {
@@ -208,15 +178,110 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PostQuitMessage(0);
             break;
         case VK_RETURN:
+            {
             if (GAME->Getgstat() == GAMESTATUS::GAMEHOME) {
-                soundmain->stop();
-                return GAME->MainProc(hWnd, message, wParam, lParam);
+                GAME->soundmain->stop();
             }
+            else if (GAME->Getgstat() == GAMESTATUS::GAMEMAIN) {
+                GAME->soundselect->stop();
+            }
+            return GAME->MainProc(hWnd, message, wParam, lParam);
+            }break;
+        case 0x31:
+            if (GAME->Getgstat() == GAMESTATUS::GAMEMAIN) {
+                GAME->soundbutton->play();
+                Sleep(200);
+                GAME->soundbutton->reset();
+                return GAME->MainProc(hWnd, message, wParam, lParam);
+            }break;
+        case 0x32:
+            if (GAME->Getgstat() == GAMESTATUS::GAMEMAIN) {
+                GAME->soundbutton->play();
+                Sleep(200);
+                GAME->soundbutton->reset();
+                return GAME->MainProc(hWnd, message, wParam, lParam);
+            }break;
+        case 0x33:
+            if (GAME->Getgstat() == GAMESTATUS::GAMEMAIN) {
+                GAME->soundbutton->play();
+                Sleep(200);
+                GAME->soundbutton->reset();
+                return GAME->MainProc(hWnd, message, wParam, lParam);
+            }break;
+        }break;
+
+    case WM_PAINT:
+        {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hWnd, &ps);
+            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
+            if (GAME->Getgstat() == GAMESTATUS::GAMEHOME) {
+                if (!bitmapMain) {
+                    bitmapMain = new Bitmap(GAME->hInst, { collection.main });
+                }
+                bitmapMain->INITBITMAP(hdc, collection.mainxy);
+                bitmapMain->EffectBlink(hWnd);
+                Sleep(100);
+            }
+
+            if (GAME->Getgstat() == GAMESTATUS::GAMEMAIN) {
+                if (!bitmapStart) {
+                    GAME->soundstart->play();
+                    bitmapMain->EffectFadeinBlack(hWnd);
+                    GAME->soundselect->play();
+                    bitmapStart = new Bitmap(GAME->hInst, collection.start);
+                    bitmapStart->INITBITMAP(hdc, collection.startxy);
+                    bitmapStart->EffectFadein(hWnd, 1);
+                    Sleep(100);
+                    bitmapStart->EffectFadein(hWnd, 8);
+                    Sleep(100);
+                }
+
+                bitmapStart->DRAWBITMAPALL(hdc);
+
+                if (!bitmapFast) {
+                    bitmapFast = new Bitmap(GAME->hInst, collection.fast);
+                    bitmapFast->INITBITMAP(hdc, collection.fastxy);
+                }
+
+                bitmapFast->DRAWBITMAP(hWnd, hdc, GAME->fastidx);
+
+                if (!bitmapNote) {
+                    bitmapNote = new Bitmap(GAME->hInst, collection.note);
+                    bitmapNote->INITBITMAP(hdc, collection.notexy);
+                }
+                bitmapNote->DRAWBITMAP(hWnd, hdc, GAME->noteidx);
+            }
+
+            if (GAME->Getgstat() == GAMESTATUS::GAMESTART) {
+                if (!bitmap1mmNor) {
+                    GAME->soundmusicsel->play();
+                    bitmapStart->EffectFadeinBlack(hWnd);
+                    Sleep(200);
+                    bitmap1mmNor = new Bitmap(GAME->hInst, collection.ingame1mmsymphonynor);
+                    bitmap1mmNor->INITBITMAP(hdc, collection.ingame1mmsymphonynorxy);
+                    bitmap1mmNor->EffectFadein(hWnd, 1);
+                    Sleep(200);
+                    GAME->sound1mmsymnor->play();
+                    Sleep(200);
+                }
+                bitmap1mmNor->DRAWBITMAPALL(hdc);
+
+                if (!bitmapinopt) {
+                    bitmapinopt = new Bitmap(GAME->hInst, GAME->inopt);
+                    bitmapinopt->INITBITMAP(hdc, collection.ingameoptxy);
+                    Sleep(100);
+                }
+                bitmapinopt->DRAWBITMAPALL(hdc);
+                Sleep(100);
+            }
+            EndPaint(hWnd, &ps);
         }
         break;
+
     case WM_DESTROY:
         PostQuitMessage(0);
-        soundmain->end();
+        GAME->soundmain->end();
         if(bitmapMain)
             bitmapMain->end();
         if (bitmapStart)

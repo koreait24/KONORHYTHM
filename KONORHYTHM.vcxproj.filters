@@ -99,5 +99,44 @@
     <Image Include="disk01normal.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="MAIN2.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="MUSICSELECT.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="EXPLAIN.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="OPTION.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="FASTER1.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="OPTNORMAL.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="NOTESELECT.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="FASTER2.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="FASTER3.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="FASTER25.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="FASTER35.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="NOTENOR.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="BOARD.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
 </Project>

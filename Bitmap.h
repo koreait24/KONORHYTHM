@@ -4,14 +4,15 @@ class Bitmap
 {
 public:
 	Bitmap(HINSTANCE& hInst, std::unordered_map<int, bool> res);
-	void DRAWBITMAP(HDC& hdc, int x, int y, bool isTran = false);
-	void INITBITMAP(HDC& hdc, int x, int y, bool isTran = false);
+	void DRAWBITMAPALL(HDC& hdc, bool isTran = false);
+	void DRAWBITMAP(HWND hWnd, HDC& hdc, int residx);
+	void INITBITMAP(HDC& hdc, std::vector<std::pair<int, int>> pos, bool isTran = false);
 	void end();
 
 public:										// 비트맵 애니메이션 섹션
-	bool GetEffectBlink();
 	void EffectBlink(HWND hWnd);
-	void EffectFadein(HWND hWnd);
+	void EffectFadein(HWND hWnd, int end);
+	void EffectFadeinBlack(HWND hWnd);
 	void EffectFadeout(HWND hWnd);
 
 public:
@@ -22,11 +23,17 @@ public:
 	std::vector<HBITMAP>	MyBitmap;
 	std::vector<BITMAP>		bit;
 	std::vector<HDC>		MemDC;
-	int						x, y;			// 이미지 그릴 좌표
-	int						bx, by;
 
-	std::unordered_map<int, bool> res;
+	std::unordered_map<int, bool>	 res;
+	std::vector<std::pair<int, int>> pos;
 	std::thread					  Blink;
 	std::mutex					  EffectMutex;
-private:
+
+	struct BITMAPINFO {
+		int		bx = 0, by = 0;
+		int		x  = 0, y  = 0;
+		int		isTran = FALSE;
+	};
+
+	std::vector<BITMAPINFO> BITINFO;
 };

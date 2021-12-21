@@ -34,6 +34,11 @@ void Sound::play()
     BGM = mciSendCommand((MCIDEVICEID)bgm, MCI_PLAY, MCI_NOTIFY, (DWORD)(LPVOID)&mciPlay);
 }
 
+void Sound::reset()
+{
+    BGM = mciSendCommand((MCIDEVICEID)bgm, MCI_SEEK, MCI_SEEK_TO_START, (DWORD)(LPVOID)&mciPlay);
+}
+
 void Sound::end()
 {
     if (wDeviceID > 0)

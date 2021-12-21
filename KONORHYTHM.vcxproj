@@ -161,10 +161,23 @@
     <ResourceCompile Include="KONORHYTHM.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="BOARD.bmp" />
     <Image Include="disk01.png" />
     <Image Include="disk01normal.bmp" />
+    <Image Include="EXPLAIN.bmp" />
+    <Image Include="FASTER1.bmp" />
+    <Image Include="FASTER2.bmp" />
+    <Image Include="FASTER25.bmp" />
+    <Image Include="FASTER3.bmp" />
+    <Image Include="FASTER35.bmp" />
     <Image Include="KONORHYTHM.ico" />
     <Image Include="MAIN.bmp" />
+    <Image Include="MAIN2.bmp" />
+    <Image Include="MUSICSELECT.bmp" />
+    <Image Include="NOTENOR.bmp" />
+    <Image Include="NOTESELECT.bmp" />
+    <Image Include="OPTION.bmp" />
+    <Image Include="OPTNORMAL.bmp" />
     <Image Include="select song.bmp" />
     <Image Include="small.ico" />
     <Image Include="START.bmp" />

@@ -8,6 +8,7 @@ public:
 	Sound(HWND hWnd, LPCTSTR lpszWave, BGMID bgm);
 	void stop();
 	void play();
+	void reset();
 	void end();
 
 private:

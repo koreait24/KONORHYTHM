@@ -16,6 +16,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <algorithm>
+#include <deque>
 // 커스텀 헤더 파일입니다.
 #include "Commondefine.h"
 // C 런타임 헤더 파일입니다.
