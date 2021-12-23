@@ -24,8 +24,8 @@ void Bitmap::INITBITMAP(HDC& hdc, std::vector<std::pair<int, int>> pos, bool isT
         GetObject(MyBitmap[index], sizeof(BITMAP), &bit[index]);
         bitinfo.bx = bit[index].bmWidth;
         bitinfo.by = bit[index].bmHeight;
-        bitinfo.x = pos[index].first;
-        bitinfo.y = pos[index].second;
+        bitinfo.x = pos.at(index).first;
+        bitinfo.y = pos.at(index).second;
 
         BITINFO.push_back(bitinfo);
         index++;
@@ -100,7 +100,6 @@ void Bitmap::EffectBlink(HWND hWnd)
             TransparentBlt(CopyDC, 0, 0, bx, by, MemDC[j], 0, 0, bx, by, RGB(255, 242, 204));
             BitBlt(hdc, 0, 0, bit[0].bmWidth, bit[0].bmHeight, MemDC[0], 0, 0, SRCCOPY);
             AlphaBlend(hdc, x, y, bx, by, CopyDC, 0, 0, bx, by, bf);
-            InvalidateRect(hWnd, &EFFECTRECT, FALSE);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(80));
     }
@@ -133,7 +132,8 @@ void Bitmap::EffectFadeout(HWND hWnd)
         }
         bf.SourceConstantAlpha = i;
         AlphaBlend(hdc, 0, 0, bit[0].bmWidth, bit[0].bmHeight, BaseDC, 0, 0, bit[0].bmWidth, bit[0].bmHeight, bf);
-        std::this_thread::sleep_for(std::chrono::milliseconds(80));
+        InvalidateRect(hWnd, NULL, FALSE);
+        std::this_thread::sleep_for(std::chrono::milliseconds(150));
     }
     DeleteObject(BaseDC);
 }
@@ -164,6 +164,7 @@ void Bitmap::EffectFadein(HWND hWnd, int end)
             }
         bf.SourceConstantAlpha = i;
         AlphaBlend(hdc, 0, 0, bit[0].bmWidth, bit[0].bmHeight, BaseDC, 0, 0, bit[0].bmWidth, bit[0].bmHeight, bf);
+        InvalidateRect(hWnd, NULL, FALSE);
         std::this_thread::sleep_for(std::chrono::milliseconds(80));
     }
     DeleteObject(BaseDC);
@@ -197,6 +198,7 @@ void Bitmap::EffectFadeinBlack(HWND hWnd)
         bf.SourceConstantAlpha = i;
         Rectangle(BaseDC, 0, 0, bit[0].bmWidth, bit[0].bmHeight);
         AlphaBlend(hdc, 0, 0, bit[0].bmWidth, bit[0].bmHeight, BaseDC, 0, 0, bit[0].bmWidth, bit[0].bmHeight, bf);
+        InvalidateRect(hWnd, NULL, FALSE);
         std::this_thread::sleep_for(std::chrono::milliseconds(80));
     }
     DeleteObject(BaseDC);

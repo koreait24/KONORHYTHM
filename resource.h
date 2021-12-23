@@ -11,7 +11,6 @@
 #define IDI_SMALL                       108
 #define IDC_KONORHYTHM                  109
 #define IDR_MAINFRAME                   128
-#define IDB_BITMAP1                     137
 #define IDB_MAIN                        137
 #define IDB_SELECT                      139
 #define IDB_VGA                         140
@@ -29,7 +28,6 @@
 #define IDB_FAST25                      154
 #define IDB_FAST35                      155
 #define IDB_NOTENOR                     156
-#define IDB_BITMAP2                     157
 #define IDB_BOARD                       157
 #define IDC_STATIC                      -1
 

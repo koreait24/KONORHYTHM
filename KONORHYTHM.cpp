@@ -50,9 +50,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
-    std::thread TGAME = std::thread{ &KONORHYTHM::start, GAME };
-    TGAME.join();
-
     // 기본 메시지 루프입니다:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
@@ -156,6 +153,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;*/
     case WM_CREATE:
     {
+        SetTimer(hWnd, 1, 500, NULL);
         Style = GetWindowLong(hWnd, GWL_STYLE);
         Style &= ~WS_MAXIMIZEBOX;
         SetWindowLong(hWnd, GWL_STYLE, Style);
@@ -210,6 +208,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }break;
         }break;
 
+    case WM_TIMER:
+        InvalidateRect(hWnd, NULL, FALSE);
+
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
@@ -221,7 +222,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
                 bitmapMain->INITBITMAP(hdc, collection.mainxy);
                 bitmapMain->EffectBlink(hWnd);
-                Sleep(100);
             }
 
             if (GAME->Getgstat() == GAMESTATUS::GAMEMAIN) {
@@ -232,9 +232,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     bitmapStart = new Bitmap(GAME->hInst, collection.start);
                     bitmapStart->INITBITMAP(hdc, collection.startxy);
                     bitmapStart->EffectFadein(hWnd, 1);
-                    Sleep(100);
                     bitmapStart->EffectFadein(hWnd, 8);
-                    Sleep(100);
                 }
 
                 bitmapStart->DRAWBITMAPALL(hdc);
@@ -257,23 +255,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (!bitmap1mmNor) {
                     GAME->soundmusicsel->play();
                     bitmapStart->EffectFadeinBlack(hWnd);
-                    Sleep(200);
                     bitmap1mmNor = new Bitmap(GAME->hInst, collection.ingame1mmsymphonynor);
                     bitmap1mmNor->INITBITMAP(hdc, collection.ingame1mmsymphonynorxy);
                     bitmap1mmNor->EffectFadein(hWnd, 1);
-                    Sleep(200);
                     GAME->sound1mmsymnor->play();
-                    Sleep(200);
                 }
                 bitmap1mmNor->DRAWBITMAPALL(hdc);
 
                 if (!bitmapinopt) {
                     bitmapinopt = new Bitmap(GAME->hInst, GAME->inopt);
                     bitmapinopt->INITBITMAP(hdc, collection.ingameoptxy);
-                    Sleep(100);
                 }
                 bitmapinopt->DRAWBITMAPALL(hdc);
-                Sleep(100);
             }
             EndPaint(hWnd, &ps);
         }
@@ -286,6 +279,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             bitmapMain->end();
         if (bitmapStart)
             bitmapStart->end();
+        KillTimer(hWnd, 1);
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
