@@ -153,7 +153,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;*/
     case WM_CREATE:
     {
-        SetTimer(hWnd, 1, 500, NULL);
+        SetTimer(hWnd, 1, 100, NULL);
         Style = GetWindowLong(hWnd, GWL_STYLE);
         Style &= ~WS_MAXIMIZEBOX;
         SetWindowLong(hWnd, GWL_STYLE, Style);
@@ -234,7 +234,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     bitmapStart->EffectFadein(hWnd, 1);
                     bitmapStart->EffectFadein(hWnd, 8);
                 }
-
                 bitmapStart->DRAWBITMAPALL(hdc);
 
                 if (!bitmapFast) {
@@ -259,8 +258,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     bitmap1mmNor->INITBITMAP(hdc, collection.ingame1mmsymphonynorxy);
                     bitmap1mmNor->EffectFadein(hWnd, 1);
                     GAME->sound1mmsymnor->play();
+                    bitmap1mmNor->DRAWBITMAPALL(hdc);
                 }
-                bitmap1mmNor->DRAWBITMAPALL(hdc);
 
                 if (!bitmapinopt) {
                     bitmapinopt = new Bitmap(GAME->hInst, GAME->inopt);
